@@ -6,9 +6,7 @@ import { context } from 'nexus/context';
 
 
 
-const server = new ApolloServer({ schema ,context,subscriptions: {
-  path: 'api/graphql'
-},});
+const server = new ApolloServer({ schema ,context});
 
 export const config={
   api: {
