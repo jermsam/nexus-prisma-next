@@ -8,8 +8,24 @@
     "start": "next start"
   },
   "dependencies": {
+    "@prisma/client": "^2.18.0",
+    "apollo-server": "^2.21.1",
+    "apollo-server-micro": "^2.21.1",
+    "graphql": "^15.5.0",
+    "graphql-postgres-subscriptions": "^1.0.5",
+    "graphql-subscriptions": "^1.2.1",
+    "graphql-yoga": "^1.18.3",
     "next": "10.0.9",
+    "nexus": "^1.0.0",
+    "pg": "^8.5.1",
     "react": "17.0.1",
     "react-dom": "17.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^14.14.35",
+    "@types/react": "^17.0.3",
+    "dotenv": "^8.2.0",
+    "prisma": "^2.18.0",
+    "typescript": "^4.2.3"
   }
 }
