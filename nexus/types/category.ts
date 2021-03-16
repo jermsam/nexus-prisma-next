@@ -1,4 +1,4 @@
-import {objectType,extendType,stringArg,queryField,nonNull,nullable,intArg} from 'nexus'
+import {objectType,extendType,stringArg,queryField,nonNull,nullable,intArg,subscriptionField} from 'nexus'
 import { Product } from 'nexus/types/product'
 import {clean} from 'utils'
 
@@ -35,13 +35,15 @@ export const createCategory = extendType({
         name: nonNull(stringArg()),
         description: nullable(stringArg())
       },
-      resolve:(__,args,ctx) =>{
+      resolve:async (__,args,ctx) =>{
       
         const data = {
           name: args.name,
           description:args.description
         }
-        return ctx.prisma.category.create({data})
+        const category = await ctx.prisma.category.create({ data })
+        ctx.pubsub.publish('newCategory',category)
+        return category
 
       }
     })
@@ -65,11 +67,11 @@ export const updateCategory = extendType({
        
          delete args[id]
          const data = clean(args);
-         
-       
-        return ctx.prisma.category.update({data,where: {
-         id,
-        },})
+         const category = await ctx.prisma.category.update({data,where: {
+          id,
+         },})
+       ctx.pubsub.publish('categoryUpdated',category)
+        return category
 
       }
     })
@@ -100,4 +102,22 @@ export const getCategories = extendType({
       },}),
     })
   },
+})
+
+export const newCategorySubscription = subscriptionField('newCategory',{
+  type: 'Category',
+ 
+  description: "Fires Any time a new Category",
+  subscribe: async (_,__, { prisma,pubsub }) => 
+  pubsub.asyncIterator('newCategory'),
+  resolve:(eventData) =>eventData,
+})
+
+export const categoryUpdatedSubscription = subscriptionField('categoryUpdated',{
+  type: 'Category',
+ 
+  description: "Fires Any time the category is updated",
+  subscribe: async (_,__, { prisma,pubsub }) => 
+  pubsub.asyncIterator('categoryUpdated'),
+  resolve:(eventData) =>eventData,
 })

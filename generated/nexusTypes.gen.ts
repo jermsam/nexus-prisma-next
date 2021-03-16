@@ -81,8 +81,10 @@ export interface NexusGenFieldTypes {
     getProducts: Array<NexusGenRootTypes['Product'] | null>; // [Product]!
   }
   Subscription: { // field return type
-    createdProduct: NexusGenRootTypes['Product'] | null; // Product
-    updatedProduct: NexusGenRootTypes['Product'] | null; // Product
+    categoryUpdated: NexusGenRootTypes['Category'] | null; // Category
+    newCategory: NexusGenRootTypes['Category'] | null; // Category
+    newProduct: NexusGenRootTypes['Product'] | null; // Product
+    productUpdated: NexusGenRootTypes['Product'] | null; // Product
   }
 }
 
@@ -113,8 +115,10 @@ export interface NexusGenFieldTypeNames {
     getProducts: 'Product'
   }
   Subscription: { // field return type name
-    createdProduct: 'Product'
-    updatedProduct: 'Product'
+    categoryUpdated: 'Category'
+    newCategory: 'Category'
+    newProduct: 'Product'
+    productUpdated: 'Product'
   }
 }
 
@@ -125,7 +129,7 @@ export interface NexusGenArgTypes {
       name: string; // String!
     }
     createProduct: { // args
-      categoryId?: number | null; // Int
+      categoryId: number; // Int!
       description?: string | null; // String
       name: string; // String!
       price: number; // Float!
@@ -139,8 +143,8 @@ export interface NexusGenArgTypes {
       categoryId?: number | null; // Int
       description?: string | null; // String
       id: number; // Int!
-      name: string; // String!
-      price: number; // Float!
+      name?: string | null; // String
+      price?: number | null; // Float
     }
   }
   Query: {

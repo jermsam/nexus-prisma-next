@@ -1,7 +1,7 @@
 
 import {
   objectType, extendType, stringArg, queryField,
-  nonNull, nullable, intArg, floatArg,
+  nonNull, nullable, intArg, floatArg,subscriptionField
 } from 'nexus'
 import { clean } from 'utils'
 
@@ -35,12 +35,12 @@ export const createProduct = extendType({
   type: "Mutation",
   definition(t) {
     t.field('createProduct', {
-      type: Product,
+      type: 'Product',
       args: {
         name: nonNull(stringArg()),
         description: nullable(stringArg()),
         price: nonNull(floatArg()),
-        categoryId:intArg()
+        categoryId:nonNull(intArg())
       },
       resolve:async (__,args,ctx) =>{
       
@@ -50,9 +50,9 @@ export const createProduct = extendType({
           price: args.price,
           categoryId:args.categoryId
         }
-        const newProduct = await ctx.prisma.product.create({ data })
-        
-        return newProduct
+        const product = await ctx.prisma.product.create({ data })
+        ctx.pubsub.publish('newProduct', product)
+        return product
 
       }
     })
@@ -63,13 +63,13 @@ export const updateProduct = extendType({
   type: "Mutation",
   definition(t) {
     t.field('updateProduct', {
-      type: Product,
+      type: 'Product',
       args: {
         id: nonNull(intArg()),
-        name: nonNull(stringArg()),
+        name: nullable(stringArg()),
         description: nullable(stringArg()),
-        price: nonNull(floatArg()),
-        categoryId:intArg()
+        price: nullable(floatArg()),
+        categoryId:nullable(intArg())
       },
        resolve:async (__,args,ctx) =>{
       
@@ -78,11 +78,11 @@ export const updateProduct = extendType({
          delete args[id]
          const data = clean(args);
          
-         const productUpdate = await ctx.prisma.product.update({data,where: {
+         const product= await ctx.prisma.product.update({data,where: {
           id,
          },})
-      
-        return productUpdate
+       ctx.pubsub.publish('productUpdated',product)
+        return product
 
       }
     })
@@ -90,7 +90,7 @@ export const updateProduct = extendType({
 })
 
 export const getProduct= queryField('getProduct', {
-  type: Product,
+  type: 'Product',
   args: {
     id: nonNull(intArg()),
   },
@@ -106,7 +106,7 @@ export const getProducts = extendType({
   type: 'Query',
   definition: t => {
     t.nonNull.list.field('getProducts', {
-      type: Product,
+      type: 'Product',
      
       resolve: (_, __, ctx) => ctx.prisma.product.findMany({include: {
         category: true, // Return all fields
@@ -115,3 +115,21 @@ export const getProducts = extendType({
   },
 })
 
+export const newProductSubscription = subscriptionField('newProduct',{
+  type: 'Product',
+ 
+  description: "Fires Any time a new Product is created",
+  subscribe: async (_,__, ctx) => 
+  ctx.pubsub.asyncIterator('newProduct'),
+  resolve:async(eventData) =>eventData,
+})
+
+
+export const productUpdatedSubscription = subscriptionField('productUpdated',{
+  type: 'Product',
+ 
+  description: "Fires Any time the product is updated",
+  subscribe: async (_,__, ctx) => 
+    ctx.pubsub.asyncIterator('productUpdated'),
+    resolve:(eventData) =>eventData,
+})

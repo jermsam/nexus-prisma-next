@@ -16,9 +16,9 @@ type Category {
 
 type Mutation {
   createCategory(description: String, name: String!): Category
-  createProduct(categoryId: Int, description: String, name: String!, price: Float!): Product
+  createProduct(categoryId: Int!, description: String, name: String!, price: Float!): Product
   updateCategory(description: String, id: Int!, name: String): Category
-  updateProduct(categoryId: Int, description: String, id: Int!, name: String!, price: Float!): Product
+  updateProduct(categoryId: Int, description: String, id: Int!, name: String, price: Float): Product
 }
 
 type Product {
@@ -45,6 +45,15 @@ type Query {
 }
 
 type Subscription {
-  createdProduct: Product
-  updatedProduct: Product
+  """Fires Any time the category is updated"""
+  categoryUpdated: Category
+
+  """Fires Any time a new Category"""
+  newCategory: Category
+
+  """Fires Any time a new Product is created"""
+  newProduct: Product
+
+  """Fires Any time the product is updated"""
+  productUpdated: Product
 }
